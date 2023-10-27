@@ -124,7 +124,7 @@ public class NonDirectedGraph
         int maxY = _adjacencyList.Keys.Max(n => n.Pos.Y);
         GraphNode endNode = GetAt(new Point(maxX, maxY));
 
-        var queue = new Queue<GraphNode>();
+        var queue = new PriorityQueue<GraphNode, int>();
         var visited = new HashSet<GraphNode>();
         var shortestPaths = new Dictionary<GraphNode, int>();
         foreach (var kvp in _adjacencyList)
@@ -133,7 +133,7 @@ public class NonDirectedGraph
         }
 
         shortestPaths[GetAt(new Point(0, 0))] = 0;
-        queue.Enqueue(GetAt(new Point(0, 0)));
+        queue.Enqueue(GetAt(new Point(0, 0)), 0);
         while (queue.Count > 0)
         {
             GraphNode node = queue.Dequeue();
@@ -145,11 +145,12 @@ public class NonDirectedGraph
             visited.Add(node);
             foreach (GraphNode neighbor in GetNeighbors(node))
             {
-                if (shortestPaths[node] + neighbor.RiskLevel < shortestPaths[neighbor])
+                int distance = neighbor.RiskLevel;
+                if (shortestPaths[node] + distance < shortestPaths[neighbor])
                 {
-                    shortestPaths[neighbor] = shortestPaths[node] + neighbor.RiskLevel;
+                    shortestPaths[neighbor] = shortestPaths[node] + distance;
                 }
-                queue.Enqueue(neighbor);
+                queue.Enqueue(neighbor, shortestPaths[neighbor]);
             }
         }
 
@@ -175,7 +176,7 @@ internal class Program
         SolvePart1(graph);
 
         board = ExtendBoard(board);
-        PrintBoard(board);
+        // PrintBoard(board);
 
         graph = BoardToGraph(board);
         SolvePart2(graph);
